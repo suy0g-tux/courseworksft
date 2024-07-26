@@ -1,0 +1,55 @@
+import socket
+import sys
+
+def print_usage():
+    print("Usage: port_scanner.py -ip <IP_ADDRESS> [-sp <START_PORT>] [-ep <END_PORT>] [--only-openport]")
+
+def scan_port(ip, port):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        s.connect((ip, port))
+        s.close()
+        return 0
+    except socket.error:
+        return -1
+
+def main(args):
+    ip = None
+    start_port = 1
+    end_port = 65535
+    only_openport = 0
+
+    i = 0
+    while i < len(args):
+        if args[i] == '-ip':
+            ip = args[i + 1]
+            i += 1
+        elif args[i] == '-sp':
+            start_port = int(args[i + 1])
+            i += 1
+        elif args[i] == '-ep':
+            end_port = int(args[i + 1])
+            i += 1
+        elif args[i] == '--only-openport':
+            only_openport = 1
+        else:
+            print_usage()
+            sys.exit()
+        i += 1
+
+    if ip is None:
+        print_usage()
+        sys.exit()
+
+    print(f"Scanning IP: {ip}, ports: {start_port}-{end_port}")
+
+    for port in range(start_port, end_port + 1):
+        result = scan_port(ip, port)
+        if result == 0:
+            print(f"Port {port}: OPEN")
+        elif only_openport == 0:
+            print(f"Port {port}: CLOSED")
+
+if _name_ == '_main_':
+    main(sys.argv[1:])
